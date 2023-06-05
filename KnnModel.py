@@ -1,9 +1,9 @@
 import numpy as np
-import pandas as pd
 import pickle as pk
 import librosa
 import joblib
 import warnings
+from crudFeatureCsv import *
 
 
 class KnnModel:
@@ -41,4 +41,5 @@ class KnnModel:
         df = pd.DataFrame(df_pca)
         prediction = self.loaded_knn.predict(df)
         # print(prediction)
+        add_song_features_to_data_csv(filepath, pandas_data, prediction[0])
         return prediction[0]

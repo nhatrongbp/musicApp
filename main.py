@@ -1,6 +1,7 @@
 # This is a sample Python script.
 from KnnModel import KnnModel
 from RecommenderModel import RecommenderModel
+from crudFeatureCsv import *
 
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -30,19 +31,20 @@ if __name__ == '__main__':
         print('name: ', r)
 
     # 2, Dự đoán nhãn (thể loại) của 1 file bài hát (wav hay mp3 đều được)
+    # LƯU Ý: lưu file bài hát vào thư mục unlabeled trước rồi mới đoán được nhãn nhé
     km = KnnModel('MLmodels/minMaxScaler.pkl',
                   'MLmodels/pca_21.pkl',
                   'MLmodels/knn1.joblib')
     # LƯU Ý: cần truyền vào đường dẫn chính xác của file wav
-    result = km.predict_wav_file('Data/unlabeled/blues.00000.wav')
-    print('Data/unlabeled/blues.00000.wav is predicted as ', result)
-    result = km.predict_wav_file('Data/unlabeled/blues.00001.wav')
-    print('Data/unlabeled/blues.00001.wav is predicted as ', result)
     result = km.predict_wav_file('Data/unlabeled/newSong00000.mp3')
     print('Data/unlabeled/newSong00000.mp3 is predicted as ', result)
     result = km.predict_wav_file('Data/unlabeled/newSong00001.mp3')
     print('Data/unlabeled/newSong00001.mp3 is predicted as ', result)
     result = km.predict_wav_file('Data/unlabeled/newSong00002.mp3')
     print('Data/unlabeled/newSong00002.mp3 is predicted as ', result)
+
+    # 3. Khi xóa 1 file bài hát, ngoài viêc xóa file wav (hoặc mp3) thì nhóc còn phải gọi
+    # tới hàm sau để t xóa thông tin bài hát khỏi model nhé
+    remove_song_features_from_data_csv('Data/unlabeled/newSong00002.mp3')
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

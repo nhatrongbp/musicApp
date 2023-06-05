@@ -30,6 +30,8 @@ class RecommenderModel:
 
         # Remove cosine similarity == 1 (songs will always have the best match with themselves)
         series = series.drop(name)
+        for i, v in series.head(n).items():
+            print('name: ', i, 'cosine similar: ', v)
 
         # Display the 5 top matches
         return series.head(n)
@@ -47,6 +49,8 @@ class RecommenderModel:
 
         # Remove cosine similarity == 1 (songs will always have the best match with themselves)
         series = series.drop(name)
+        for i, v in series.head(n).items():
+            print('name: ', i, 'euclid distance: ', v)
 
         # Display the 5 top matches
         return series.head(n)
