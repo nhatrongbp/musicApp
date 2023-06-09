@@ -1,13 +1,16 @@
+# -- coding: utf-8
 from flask import Flask, jsonify, request, send_file
 import os
 
+from KmeansModel import KmeansModel
 from KnnModel import KnnModel
 from RecommenderModel import *
 from crudFeatureCsv import *
 
 app = Flask(__name__)
 app.config["UPLOAD_DIR"] = "Data/unlabeled/"
-km = KnnModel('MLmodels/minMaxScaler.pkl', 'MLmodels/pca_21.pkl', 'MLmodels/knn1.joblib')
+knn = KnnModel('MLmodels/minMaxScaler.pkl', 'MLmodels/pca_21.pkl', 'MLmodels/knn1.joblib')
+km = KmeansModel('csvData/userFavouriteData.csv')
 
 
 @app.route('/hello', methods=['GET'])
@@ -16,18 +19,6 @@ def helloworld():
         return send_file('Data\\tempSong\\temp.mp3')
     # data = {"data": "Hello World"}
     # return jsonify(data)
-
-
-# @app.route("/upload", methods=["GET", "POST"])
-# def upload():
-# 	if request.method == 'POST':
-# 		file = request.files['file']
-# 		if file.filename.split('.')[-1] != 'wav' and file.filename.split('.')[-1] != 'mp3':
-# 			data = {"error": "the song must be in mp3 or wav format"}
-# 			return jsonify(data)
-# 		file.save(os.path.join(app.config['UPLOAD_DIR'], file.filename))
-# 		data = {"data saved at": os.path.join(app.config['UPLOAD_DIR'], file.filename)}
-# 		return jsonify(data)
 
 
 @app.route("/predict", methods=["GET", "POST"])
@@ -44,13 +35,13 @@ def predict():
         # LƯU Ý: cần truyền vào đường dẫn chính xác
         song_name = request.args.get('songName')
         temp_path = app.config['UPLOAD_DIR'] + song_name
-        result = km.predict_wav_file(temp_path)
+        result = knn.predict_wav_file(temp_path)
         data = {"label": result}
         return jsonify(data)
 
 
 @app.route("/recommend", methods=["GET"])
-def recommend():
+def recommend_songs_by_song():
     if request.method == 'GET':
         song_name = request.args.get('songName')
         n = int(request.args.get('minN'))
@@ -63,6 +54,31 @@ def recommend():
             # print((index, value))
             data['data'].update({"song" + str(index): value})
 
+        return jsonify(data)
+
+
+@app.route("/recommendGenresByUserId", methods=["GET"])
+def recommend_genres_by_user_id():
+    if request.method == 'GET':
+        user_id = int(request.args.get('userId'))
+        number_of_genres = int(request.args.get('n'))
+        if number_of_genres > 10 or number_of_genres < 1:
+            number_of_genres = 2
+        print(user_id)
+        res = km.recommend_genre_of_user_by_id(user_id, number_of_genres)
+        data = {"data": {}}
+        for index, value in enumerate(res):
+            data['data'].update({"genre" + str(index): value})
+            print(value)
+        return jsonify(data)
+
+
+@app.route("/trainUserKmeans", methods=["GET"])
+def train_user_kmeans():
+    if request.method == "GET":
+        km.train()
+        km.predict()
+        data = {"data": "trained successfully"}
         return jsonify(data)
 
 
